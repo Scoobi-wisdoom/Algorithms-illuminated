@@ -1,7 +1,7 @@
 # memo for coding interviews
 ## Java
-- [BigInteger: add, multiply](/src/main/java/JavaChapter1Problem6.java)
-- [String.format %s length s](/src/main/java/JavaChapter1Problem6.java)
+- [BigInteger: add, multiply](/problems-in-jvm/src/main/java/JavaChapter1Problem6.java)
+- [String.format %s length s](/problems-in-jvm/src/main/java/JavaChapter1Problem6.java)
 ## Kotlin
-- [substring with a single or two parameters](/src/main/kotlin/Chapter1Problem6.kt) 
-- [padStart](/src/main/kotlin/Chapter1Problem6.kt)
+- [substring with a single or two parameters](/problems-in-jvm/src/main/kotlin/Chapter1Problem6.kt) 
+- [padStart](/problems-in-jvm/src/main/kotlin/Chapter1Problem6.kt)
