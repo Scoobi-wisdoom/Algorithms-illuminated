@@ -4,7 +4,9 @@ his README is about notes on Algorithms courses from [coursera - Divide and Conq
 However, problems in this repository are from text books Algorithm Illuminated.
 
 ## Implementation Struggles
-probelm 1.6 Karatsuba multiplication
+- problem 1.6 Karatsuba multiplication   
+- theorem 5.5 why it is $` 2^k `$   
+- problem 6.3 DSelect for the weighted median   
 
 # Divide and Conquer, Sorting and Searching, and Randomized Algorithms
 ## week 1 - Merge sort and worst case analysis
@@ -25,7 +27,7 @@ Merge sort is a typical example of divide & conquer while it is a better version
 where $` m = \log_2 n `$ which means the number of levels is $` m + 1 = \log_2 n + 1 `$
 
 At the j level there are $` 2^j `$ subproblems of array size $` n/2^j `$.
-#### sudo code during merge
+#### pseudo code during merge
 ```text
 i := 0
 j := 0
@@ -365,6 +367,186 @@ m should be found such that $` \lim\limits_{n\to \infty} n^{(\frac{1}{2})^m}  = 
 \end{align}
 ```
 Since $` \sum_{j=0}^{m}1 = O(\log\log n)`$, $` T(n) = O(\log\log n) `$.   
+
+## week 3 - QuickSort
+#### quick sort overview
+QuickSort is an in-place sorting algorithm, unlike MergeSort, which requires additional space. This makes QuickSort preferable for many programming libraries as their default sorting algorithm. Key idea of QuickSort is:
+- Pivot
+  - Partition
+- Swap
+
+QuickSort picks a pivot and rearranges other elements to the left and right of the pivot (partition), according to comparison between an element and the pivot (the one smaller than the pivot goes to the left and bigger to the right). During partition, sorting does not happen on the subproblems. It is only the pivot which goes to the rightful place. The partition step runs in O(n) time, and unlike MergeSort, QuickSort does not have an explicit combine step, and split the problem into left and right subproblems around the pivot.   
+Proof: Correctness   
+To prove this by mathematical induction, let P(n) denote for every input array of length n, QuickSort algorithm sorts the input array in order. For n = 1, the array is trivially sorted. Assume for n = k, QuickSort correctly sorts any input array of size k. Now, P(k+1) needs to be shown. For n = k+1, QuickSort selects a pivot and partitions the array into two subarrays:
+```text
+An input of length k+1
+┌───────────────────────────┬─────┌───────────────────────────┐
+│             pivot >       │pivot│      > pivot              │
+└───────────────────────────┴─────└───────────────────────────┘
+<---- at most k length ---->      <---- at most k length ---->
+```
+By the assumption, the left and right partitions (each of at most k elements) are correctly sorted. Since the pivot is placed in its rightful position, the entire array of length k+1 is sorted. Hence, P(k+1) holds.   
+
+#### QuickSort
+QuickSort algorithm takes three inputs:
+- A: an input array of n length
+- l: left endpoint (for initial execution, l = 0)
+- r: right endpoint   
+
+Also here, the choice of a pivot and the partition subroutine remain abstract.
+```text
+Given
+         ┌─────┬─────┬─────┬─────┬─────┬─────┬─────┬─────┐
+array A  │     │ ... │     │     │     │ ... │     │     │
+         └─────┴─────┴─────┴─────┴─────┴─────┴─────┴─────┘
+index:      0          l-1    l                       r
+
+Choose a pivot p, and swap it with the left endpoint.
+         ┌─────┬─────┬─────┬─────┬─────┬─────┬─────┬─────┐
+         │     │ ... │     │  p  │ ... │     │     │     │
+         └─────┴─────┴─────┴─────┴─────┴─────┴─────┴─────┘
+            0          l-1    l                       r
+
+Execute partition on the subarray from index l to r.
+         ┌─────┬─────┬─────┬─────┬─────┬─────┬─────┬─────┐
+         │     │ ... │     │  p  │ ... │     │     │     │
+         └─────┴─────┴─────┴─────┴─────┴─────┴─────┴─────┘
+            0          l-1    l                       r
+                            <----- partition target ---->
+
+Recursively call QuickSort excluding the pivot.
+               ┌─────┬─────┬─────┬─────┬─────┬─────┬─────┐
+               │     │ ... │     │  p  │     │ ... │     │
+               └─────┴─────┴─────┴─────┴─────┴─────┴─────┘
+                <-- QuickSort -->       <-- QuickSort -->
+```
+
+#### Partition
+The partition subroutine returns an index of the pivot after placing the pivot at a rightful location. 
+At the start of the partition subroutine, the pivot is placed at the beginning of the array. This specifically applies to the first call to Partition, where the pivot is initially placed at index 0.
+```text
+Initialization
+                     ┌─────┬─────┬─────┬─────┬─────┬─────┬─────┐
+partition target     │  p  │     │ ... │     │     │     │     │
+                     └─────┴─────┴─────┴─────┴─────┴─────┴─────┘
+index:                       i,j
+
+All done before swap and return step
+                     ┌─────┬─────┬─────┬─────┬─────┬─────┬─────┐
+                     │  p  │ ... │     │  k  │     │ ... │     │
+                     └─────┴─────┴─────┴─────┴─────┴─────┴─────┘
+                                                i           j
+                            <----  p >  ----> <----  p <  ---->
+
+Swap the pivot with the right most element smaller than the pivot.
+                     ┌─────┬─────┬─────┬─────┬─────┬─────┬─────┐
+                     │  k  │ ... │     │  p  │     │ ... │     │
+                     └─────┴─────┴─────┴─────┴─────┴─────┴─────┘
+                                                i
+                      <----  p >  ---->       <----  p <  ---->
+```
+After the processes are finished in the figure above, the partition subroutine returns a rightful location of the pivot.   
+
+It is a choice of pivot which determines efficiency of the QuickSort algorithm. If an input array is already sorted and also if the pivot is always the first element, then QuickSort algorithms run in $` O(n^2) `$. To be away from this situation, choice of a pivot is randomized.   
+
+Master Method does not apply to QuickSort because pivot is randomly chosen and subproblems are of different sizes.   
+
+#### Theorem 5.1
+For every input array of length $` n \geq 1 `$, the average running time of randomized QuickSort is $` O(n \log n) `$.   
+Proof:   
+This is implied by Lemma 5.2 and Theorem 5.3.
+
+#### Lemma 5.2
+There is a constant $` a > 0 `$ such that for every input array A of length at least 2 and every pivot sequence $` \omega `$, $` RT(\omega) \leq a \cdot C(\omega) `$.   
+- RT: running time of QuickSort.
+- C: total number of comparisons made by QuickSort.   
+
+Proof:   
+Each QuickSort call consists of a partition step followed by two recursive calls. The partition step involves comparing each element to the pivot, performing a constant amount of extra work per comparison, such as swapping elements. Thus, the total work done in a partition step is at most a constant multiple of the number of comparisons made. Summing over all partitions,
+```math
+RT(\omega) = \sum_{\text{all partitions}} (\text{constant} \cdot \text{number of comparisons in that partition} + \text{constant}).
+```
+Since the total number of comparisons across all partitions is precisely $` C(\omega) `$, for some constants $` a' `$ and $` b' `$ this equations is expressed as:
+```math
+\begin{align}
+RT(\omega) = a' \cdot C(\omega) + b' \\
+\Rightarrow  RT(\omega) \leq a \cdot C(\omega)
+\end{align}
+```
+by choosing sufficiently large $` a `$.   
+
+This means that the possible number of comparisons between two arbitrarily chosen elements matter to determine the running time of QuickSort.
+
+#### Theorem 5.3
+For every input array of length $` n \geq 1 `$, the expected number of comparisons between input array elements in randomized QuickSort is at most $` 2 \cdot (n-1)\ln n = O(n\log n) `$.   
+Proof:   
+Let $` z_i `$ and $` z_j `$ denote the ith and jth smallest elements of the input array. Define $` X_{ij}(\omega) `$ as the number of comparisons between $` z_i `$ and $` z_j `$ in QuickSort when the pivots are specifed by $` \omega `$ for every fixed choice of pivots $` \omega `$. The total number of comparisons made by QuickSort is expressed as:
+```math
+\begin{align}
+C(\omega) = \sum_{i=1}^{n-1}\sum_{j=i+1}^{n} X_{ij}(\omega) \\
+\Rightarrow E(C) = \sum_{i=1}^{n-1}\sum_{j=i+1}^{n} E(X_{ij}) \\
+= \sum_{i=1}^{n-1}\sum_{j=i+1}^{n} \Pr(X_{ij}=1). \\
+= \sum_{i=1}^{n-1}\sum_{j=i+1}^{n} \frac{2}{j - i + 1} \ \ \ \ \ \text{ by Lemma 5.4.}
+\end{align}
+```
+This is bounded:
+```math
+\begin{align}
+\sum_{i=1}^{n-1}\sum_{j=i+1}^{n} \frac{2}{j - i + 1} \leq \sum_{i=1}^{n-1} 2 \cdot (\frac{1}{2} + \frac{1}{3} + \cdot \cdot \cdot + \frac{1}{n}) \\
+= 2 \cdot (n-1)\sum_{j=2}^{n}\frac{1}{j} \\
+\leq 2 \cdot (n-1) \int_{1}^{n} \frac{1}{x} \,dx \\
+= 2 \cdot (n-1) \ln n = O(n \log n)
+\end{align}
+```
+
+#### Lemma 5.4
+If $` z_i `$ and $` z_j `$ denote the ith and jth smallest elements of the input array, with $` i < j `$, then, $` \Pr [z_i,z_j \text{ get compared in randomized QuickSort}] = \frac{2}{j - i + 1} `$    
+Proof:   
+Considering the fact that QuickSort's recursive calls on the left and right of the pivot, the pivot should not be between $` z_i `$ and $` z_j `$ for $` z_i `$ and $` z_j `$ to be compared eventually. Therefore,
+```math
+\begin{align}
+\Pr [z_i,z_j \text{ get compared at some point in randomized QuickSort}] \\
+= \Pr [z_i \text{ or } z_j \text{ is chosen as a pivot before any of } z_{i+1}, ..., z_{j-1}] \\
+= \frac{2}{j - i + 1} \\
+\end{align}
+```
+because randomized QuickSort chooses a pivot at uniformly random.      
+
+#### Theorem 5.5
+There is a constant $` c > 0 `$ such that, for every $` n \geq 1 `$, every comparison-based sorting algorithm performs at least $` c \cdot n \log_2 n `$ operations on some length-n input array.   
+- A comparison-based sorting algorithm orders elements using only pairwise comparisons, without accessing or manipulating values directly. Examples of non-comparison-based sorting algorithms are: BucketSort, CountingSort, and RadixSort.    
+
+Proof:   
+Assume a comparison-based sorting algorithm which does at most k comparisons. Through this algorithm, there are $` 2^k `$ number of possible execution paths such as below:
+```text
+             Compare A[1], A[2]
+            /                   \
+    A[1] < A[2]               A[1] > A[2]
+       /       \                 /       \
+A[2] < A[3]   A[2] > A[3]   A[1] < A[3]  A[1] > A[3]
+      ...         ...          ...          ...
+```
+This algorithm can distinguish between at most different $` 2^k `$ inputs and execute in at most $` 2^k `$ different ways. An input array of length n could be arranged in $` n! `$ ways. So, to differentiate all possible arrangements, k should satisfy $` 2^k \geq n! `$. By the fact that the first n/2 elements of $` n! `$ is greater than $` n/2 `$:
+```math
+\begin{align}
+2^k \geq n! \geq (\frac{n}{2})^{n/2} \\
+\Rightarrow k \geq n/2 \cdot(\log_2 n - 1) \\
+= \Omega(n \log n)
+\end{align}
+```
+
+### Problem 5.1
+Choose elements which could have been the pivot element.
+```text
+┌─────┬─────┬─────┬─────┬─────┬─────┬─────┬─────┬─────┐
+│  3  │  1  │  2  │  4  │  5  │  8  │  7  │  6  │  9  │
+└─────┴─────┴─────┴─────┴─────┴─────┴─────┴─────┴─────┘
+```
+Not 7. After partition is over all elements on the left of the pivot are smaller than the pivot.   
+
+### Problem 5.5
+Extend the $` \Omega(n \log n) `$ lower bound from Theorem 5.5 to apply also to the expected running time of randomized comparison-based sorting algorithms.   
+The running time of a sorting algorithm depends on the number of comparison operations. Even with randomness, the number of comparisons needed to distinguish between different input arrays remains the same. This is because, regardless of random choices, the number of comparison operations must be sufficient to distinguish between all $` n! `$ possible permutations of the array.
 
 # References
 - Tim Roughgarden. (2018)  Algorithms Illuminated Part 1 (1st ed.). Soundlikeyourself Publishing, LLC
