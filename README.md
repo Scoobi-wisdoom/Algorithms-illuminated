@@ -548,5 +548,233 @@ Not 7. After partition is over all elements on the left of the pivot are smaller
 Extend the $` \Omega(n \log n) `$ lower bound from Theorem 5.5 to apply also to the expected running time of randomized comparison-based sorting algorithms.   
 The running time of a sorting algorithm depends on the number of comparison operations. Even with randomness, the number of comparisons needed to distinguish between different input arrays remains the same. This is because, regardless of random choices, the number of comparison operations must be sufficient to distinguish between all $` n! `$ possible permutations of the array.
 
+## week 4 - Linear-Time Selection
+- RSelect: randomized selection. O(n)   
+- DSelect: deterministic selection. O(n)  
+
+While both run in O(n) time, RSelect is typically faster in practice because DSelect has a larger constant factor. Additionally, DSelect requires more memory than RSelect since execution of DSelect is not in-place.   
+
+After sorting an input array, it is easy to get ith smallest value, but this is not linear time but $` O(n\log n) `$.
+#### RSelect overview
+- Choose a pivot randomly.
+- Execute partition process of QuickSort.
+- Choose one and only one subarray to recurse on depending on comparison between the pivot location and i.
+```text
+Choice of a recursion:       i ∈ [left part]         i ∈ [right part]      
+                            ─────────────────       ─────────────────    
+                           ┌─────┬─────┬─────┬─────┬─────┬─────┬─────┐
+                           │     │ ... │     │  p  │     │ ... │     │
+                           └─────┴─────┴─────┴─────┴─────┴─────┴─────┘
+index:                                          k
+                            <----  p >  ---->       <----  p <  ---->
+```
+The running time of RSelect depends on how good a chosen pivot is.   
+
+#### Theorem 6.1
+For every input array of length $` n \geq 1 `$, the average running time of RSelect is O(n). 
+
+Proof:   
+Since there is only one recursive call to RSelect, to track the size of the subarray on a recursive call phase j is used. 
+- Phase j: progress of a recursive call to RSelect in relation with the length of its subarray. 
+  - If the length of its subarray is between $` n \cdot (\frac{3}{4})^{j+1} `$ and $` n \cdot (\frac{3}{4})^j `$, the recursive call is in phase j.    
+- $` X_j `$: number of phase-j recursive calls   
+
+Because RSelect's running time is O(n) outside of its recursive call (partition), there is a constant $` c > 0 `$ such that for every input array of length n, RSelect performs at most cn operations outside of its recursive call. So, in each phase-j recursive call RSelect performs at most $` c \cdot (\frac{3}{4})^j \cdot n `$ operations. So the total running time is:
+```math
+\begin{align}
+\text{running time of RSelect} \leq \sum_{j \geq 0} X_j \cdot c \cdot  (\frac{3}{4})^j \cdot n \\
+= cn \sum_{j \geq 0} (\frac{3}{4})^j \cdot X_j \\
+\Rightarrow E[\text{running time of RSelect}] \leq cn \sum_{j \geq 0} (\frac{3}{4})^j \cdot E[X_j] \\
+\end{align}
+```
+
+By corollary 6.5, 
+```math
+\begin{align}
+E[\text{running time of RSelect}] = cn \sum_{j \geq 0}(\frac{3}{4})^jE[X_j] \leq 2cn\sum_{j \leq 0}(\frac{3}{4})^j \\
+= 8cn \ \ \ \ \ \ \ \ \ \ \\
+\therefore E[\text{running time of RSelect}] = O(n) \\
+\end{align}
+```
+
+#### Proposition 6.2
+If a phase-j recursive call chooses an approximate median, then the next recursive call belongs to phase j+1 or later.   
+Proof:   
+- Approximate median: an element greater than at least 25% of the other elements in the subarray and less than at least 25% of the other elements   
+
+By definition of an approximate median, given that an approximate median has been chosen, the subarray of the next recursive call is sized at most 75%, i.e. $` \frac{3}{4} `$
+```text
+     25%                           25%
+ ───────────                   ───────────    
+┌─────┬─────┬─────┬─────┬─────┬─────┬─────┐
+│     │ ... │     │     │     │ ... │     │
+└─────┴─────┴─────┴─────┴─────┴─────┴─────┘
+             ─────────────────
+       possible approximate medians
+```
+#### Proposition 6.3
+A call to RSelect chooses an approximate median with probability at least 50%.   
+Proof:   
+This follows directrly from the uniform randomness of the pivot choice, and also by the definition of an approximate median.   
+
+#### Proposition 6.4
+For each phase j, $` E[X_j] \leq E[N] `$.   
+- N: number of tries of tossing a coin till it is heads   
+  - Rather than dealing with the complexities of $` X_j `$​ , we compare it to N, which follows a straightforward coin-flipping process.
+
+Proof:   
+It is to be shown
+```math
+\begin{align}
+E[X_j] = E[X_j | O_j] \cdot Pr(O_j) + E[X_j | O_j^\complement] \cdot Pr(O_j^\complement) \\
+\leq E[N] \\
+\end{align}
+```
+where $` O_j `$ denotes the event that phase j actually occurs. $` O_j^\complement `$ happens if the chosen median reduces the subarray size more than 25% (for example, getting the exact median).    
+Here, $` E[X_j | O_j^\complement] \cdot Pr(O_j^\complement) = 0 `$ because:   
+```math
+\begin{align}
+E[X_j | O_j^\complement] = \sum_{x \geq 0} x \cdot Pr(X_j = x | O_j^\complement) \\
+= 0 \cdot Pr(X_j = 0 | O_j^\complement) + \sum_{x > 0} x \cdot Pr(X_j = x | O_j^\complement) \\
+= 0 \cdot 1 + \sum_{x > 0} x \cdot 0 \ \ \ \because Pr(X_j = 0 | O_j^\complement) = 1 \text{ by definition of } O_j \\ 
+\therefore E[X_j | O_j^\complement] = 0.
+\end{align}
+```
+So, $` E[X_j] = E[X_j | O_j] \cdot Pr(O_j) `$.    
+
+Now, by showing $` E[X_j | O_j] \cdot Pr(O_j) \leq E[N] `$ the proof is done. By the fact that there is only single recursive call, if any, to RSelect in each phase: 
+```math
+\begin{align}
+E[X_j | O_j] = \sum_{j \geq 0} 1 \cdot Pr(X_j = 1 | O_j) \cdot Pr(O_j) \\
+= \sum_{j \geq 0} Pr(O_j) \ \ \ \because Pr(X_j = 1 | O_j) = 1
+\end{align}
+```
+Also, $` E[N] = \sum_{n = 0}^{\infty} n \cdot Pr(N = n) `$. Putting altogether, the inequality is expressed as:
+```math
+\begin{align}
+E[X_j | O_j] \leq E[N] \\
+\Rightarrow \sum_{j \geq 0} Pr(O_j) \leq \sum_{n = 0}^{\infty} n \cdot Pr(N = n) \\
+= \sum_{n = 0}^{\infty} n \cdot (\frac{1}{2})^n \\
+\end{align}
+```
+By proposition 6.2 and 6.3, $` Pr(O_j) `$ reduces at least of a factor of 50% whereas the right-hand side's is exactly 50%. So the inequality holds.   
+
+#### Corollary 6.5
+For every j, $` E[X_j] \leq 2 `$.   
+Proof:   
+This follows by the fact that $` E[N] = \sum_{n = 0}^{\infty} n \cdot (\frac{1}{2})^n = 2 `$ and proposition 6.4. $` \sum_{n = 0}^{\infty} n \cdot (\frac{1}{2})^n = 2 `$ because
+```math
+\begin{align}
+\sum_{n=0}^{\infty} x^n = \frac{1}{1-x} \text{ , for } |x| < 1 \\ 
+\Rightarrow \sum_{n=0}^{\infty} n \cdot x^{n-1} = \frac{1}{(1-x)^2} \\
+\Rightarrow \sum_{n=1}^{\infty} n \cdot x^n = \frac{x}{(1-x)^2} \\
+\text{By applying } x = \frac{1}{2}, \\ 
+\sum_{n = 1}^{\infty} n \cdot (\frac{1}{2})^n = \frac{\frac{1}{2}}{(1 -\frac{1}{2})^2} = 2 \\
+\therefore E[N] = 2 \\
+\end{align}
+```
+
+#### DSelect pseudo code
+- Input: array A of $` n \geq 1 `$ distinct numbers, and an integer $` i \in \set{1, 2, ..., n} `$.
+- Output: the ith order statistic of A.
+```text
+ 1  if n = 1 then
+ 2      return A[1]
+ 3  for h := 1 to n/5 do
+ 4      C[h] := middle element from the hth group of 5
+ 5  p := DSelect(C, n/10)
+ 6  partition A around p
+ 7  j := p's position in partitioned array
+ 8  if j = i then
+ 9      return p
+10  else if j > i then
+11      return DSelect(first part of A, i)
+12  else
+13      return DSelect(second part of A, i - j)
+```
+This algorithm is identical to RSelect except lines 3 to 5, where the pivot is chosen deterministically using the median-of-medians method rather than randomly.
+
+### Quiz 6.3
+A single call to DSelect has 2 recursive calls not 1. The first occurs when finding the median-of-medians while the second happens after partitioning.      
+
+#### Theorem 6.6
+For every input array of length $` n \geq 1 `$, the running time of DSelect is O(n).   
+Proof:   
+DSelect is expressed in a recurrence format of: 
+```math
+T(n) \leq T(\frac{1}{5}n) + T(\frac{7}{10}n) + O(n).
+```
+- $` T(\frac{1}{5}n) `$: operations in line 5 in the pseudo code
+- $` T(\frac{7}{10}n) `$: operations in line eiter 11 or 13 by lemma 6.7
+- O(n): running time bound of sorting each of $` \frac{n}{5} `$ arrays with length 5, more exactly $` \Theta(n) `$.   
+
+$` T(n) \leq l \cdot n `$ to be shown for some constant $` l > 0 `$ through mathematical induction. Choose $` l = 10c `$. For the base case, T(1) = 1. This holds for $` c \geq 1 `$, $` T(1) \leq l`$. Assume $` T(k) \leq l \cdot k `$ for $` k < n `$. So,
+```math
+\begin{align}
+T(n) \leq T(\frac{1}{5}n) + T(\frac{7}{10}n) + cn \\
+\leq l \cdot \frac{1}{5}n + l \cdot \frac{7}{10}n + cn \\
+= (\frac{9}{10}l + c)n = 10cn \\
+\therefore T(n) \leq l \cdot n \\
+\end{align}
+```
+Thus, T(n) = O(n).
+
+#### Lemma 6.7
+For every input array of length $` n \geq 2 `$, the subarray passed to the recursive call in line 11 or 13 of DSelect has length at most $` \frac{7}{10}n `$.   
+Proof:   
+Let $` k = \frac{n}{5} `$ denote the number of groups of size 5. Also let x_i denote the median of each group where $` i \in \set {1, 2, ..., \frac{n}{5}} `$. Then, the median-of-medians is x_k/2 if k is even; otherwise, it is ⌈k/2⌉. By the drawing below, the median-of-medians is greater than at least 30% of elements in the input array.
+```text
+              | Group 1 |   ...   |Group k/2|   ...   | Group k |
+              |---------|---------|---------|---------|---------|
+              | greater |   ...   | greater |   ...   | greater |
+              | greater |   ...   | greater |   ...   | greater |
+          ┌─  |   x_1   |   ...   |  x_k/2  |   ...   |  x_n/5  |
+3/5 rows  │   | smaller |   ...   | smaller |   ...   | smaller |
+          │   | smaller |   ...   | smaller |   ...   | smaller |
+          │
+          └─────────────────────────────────┘
+                         1/2 columns
+3/5 * 1/2 = 30%
+```
+Similarly, the median-of medians is less than at least 30% of elements in the input array. So, the median-of-medians, i.e. the pivot, lies between a range of excluding left and right 30% of the array such as below:
+```text
+  30% of n                       30% of n
+ ───────────                   ───────────
+┌─────┬─────┬─────┬─────┬─────┬─────┬─────┐
+│     │ ... │     │     │     │ ... │     │
+└─────┴─────┴─────┴─────┴─────┴─────┴─────┘
+             <- pivot range ->
+```
+Thus, the subarray passed to the recursive call in line 11 or 13 is guaranteed to have at most $` \frac{7}{10}n `$.
+
+### Problem 6.3
+Suppose an unsorted input array of length n consisting of distinct elements $` x_i `$ for $` i \in \set{1,2,..., n} `$. Each element $` x_i `$ has a positive weight $` w_i `$, and let $` W = \sum_{i = 1}^{n} w_i `$. Using DSelect, find an element $` x_k `$ such that  $` \sum_{x_i < x_k} w_i \leq \frac{W}{2} `$ and also $` \sum_{x_i > x_k} w_i  \leq \frac{W}{2} `$. Observe that there is either one or two such elements.   
+- Input
+  - A: the input array of length n
+  - W: $` \sum_{i=1}^{n} w_i `$
+  - D_L: total discarded weights of elements that are less than the elements of the subarray; initialized as 0
+  - D_R: total discarded weights of elements that are greater than the elements of the subarray; initialized as 0
+```text
+ 1  function WeightedMedian(A, W, D_L, D_R)
+ 2      if n = 1 then
+ 3          return A[0]
+ 4      p := DSelect(A, n/2)  // Compute unweighted median
+ 5      Partition A around p
+ 6      Compute W_L and W_R, the total weight of elements on each side of p
+ 7      if W_L + D_L ≤ W/2 and W_R + D_R ≤ W/2 then
+ 8          return p
+ 9      else if W_L + D_L > W/2 then
+10          return WeightedMedian(left part of A, W, D_L, D_R + W_R + weight of p)
+11      else         // Since the total weight is W, both sides cannot each have weight > W/2.
+12          return WeightedMedian(right part of A, W, D_L + W_L + weight of p, D_R)
+```
+This algorithm is represented by a recurrence format:
+```math
+\begin{align}
+T(n) \leq T(\frac{n}{2}) + O(n) \\
+\therefore T(n) = O(n) \ \text{ by Master Method.}
+\end{align}
+```
+
 # References
 - Tim Roughgarden. (2018)  Algorithms Illuminated Part 1 (1st ed.). Soundlikeyourself Publishing, LLC
