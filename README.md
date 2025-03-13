@@ -1,5 +1,5 @@
 # Overview
-his README is about notes on Algorithms courses from [coursera - Divide and Conquer, Sorting and Searching, and Randomized Algorithms](https://www.coursera.org/learn/algorithms-divide-conquer?specialization=algorithms). This file uses LaTeX.
+his README is about notes on Algorithms courses from [coursera - Divide and Conquer, Sorting and Searching, and Randomized Algorithms](https://www.coursera.org/learn/algorithms-divide-conquer?specialization=algorithms). This file uses LaTeX. Even though it is a lecture note, lecture contents not included in the textbooks were ignored.   
 
 However, problems in this repository are from text books Algorithm Illuminated.
 
@@ -776,5 +776,53 @@ T(n) \leq T(\frac{n}{2}) + O(n) \\
 \end{align}
 ```
 
+## week 4 - Graphs and the Contraction Algorithm
+A graph means pairs of objects. A graph consists of vertices (V), aka. nodes, and edges (E), aka. arcs or pairs of vertices.    
+
+Unlike an array input, which has a length, a graph's size needs more attention to be defined. This is a function of two parameters: the number of vertices and the number of edges. In notation expression, for a graph G = (V, E) with vertex set V and edge set E, 
+- n = |V|: the number of vertices
+- m = |E|: the number of edges.   
+
+In an undirected graph, m depends on n denoted as $` m = \Omega(n) `$ since there are at least n-1 number of edges. Also, $` m = O(n^2) `$ since there are at most $` \frac{n(n-1)}{2} `$ number of edges with an assumption of no parallel edge, which means there is at most one undirected edge between each pair of vertices.
+```text
+Sparse (few edges)    Ω(n) <-----------------> O(n²)    Dense (many edges)
+```
+#### adjacency list
+The adjacency list consists of:
+1. an array containing the graph's vertices
+2. an array containing the graph's edges
+3. for each edge, a pointer to each of its two endpoints
+4. for each vertex, a pointer to each of the incident edges.
+
+In a graph, an edge is said to be incident to a vertex if the vertex is one of the endpoints of the edge. For example, in an undirected graph:
+```text
+A --- B --- C
+```
+The edge (A, B) is incident to both A and B.
+
+### Quiz 7.2
+How much space does the adjacency list representation of a graph require, as a function of the number n of vertices and the number m of edges?   
+It is trivial to say that the first and the second ingredients' are O(n) and O(m), respectively. Since the third ingredient is a pointer for two enpoints, it is 2m = O(m). Since the fourth and the third one are in one-to-one correspondence, the fourth is also O(m). So,
+```math
+O(n) + O(m) + O(m) + O(m) = O(n + m).
+```
+
+#### adjacency matrix
+The adjacency matrix representation of a graph G = (V, E) with n vertices consists of elements $` A_{ij} `$ such that $` \begin{equation} A_{ij} = \begin{cases} 1 & \text{if edge (i, j) belongs to E} \\ 0 & \text{otherwise } \end{cases}\end{equation} `$.   
+
+Since the adjacency matrix's memory space is $` O(n^2) `$, if the given graph is sparse, the adjacency list is preferred over the matrix. Also, choosing adjacency list over the matrix takes less time when to figure out which edges are incident to a given vertex.   
+
+### Problem 7.1
+Let G = (V, E) be an undirected graph. By the degree of a vertex $` v \in V `$, we mean the number of edges in E that are incident to v (i.e., that have v as an endpoint). For each of the following conditions on the graph G, is the condition satisfied only by dense graphs, only by sparse graphs, or by both some sparse and some dense graphs? As usual, n = |V| denotes the number of vertices. Assume that n is large (say, at least 10,000).   
+(a) At least one vertex of G has degree at most 10.   
+It is trivial that all sparse graphs are this case. Also, a dense graph in which all vertices have n-1 edges except one vertex having just one edge satisties this condition.
+(c) At least one vertex of G has degree n - 1.
+It is trivial that all dens graphs are this case. Also, a sparse graph in which there is a center vertex connected to n - 1 vertices satisties this condition.   
+
+### Problem 7.3
+Suppose a directed graph G = (V,E) represented with adjacency lists, with each vertex storing an array of its outgoing edges (but not its incoming edges). Given a vertex $` v \in V `$, how many operations are required to identify the incoming edges of v?   
+By the operation in detail is checking all outgoing edges whose endpoint is v. So the number of edges, i.e. m, is to be parsed one by one. Thus it is $` \Theta(m) `$.
+
 # References
 - Tim Roughgarden. (2018)  Algorithms Illuminated Part 1 (1st ed.). Soundlikeyourself Publishing, LLC
+- Tim Roughgarden. (2018)  Algorithms Illuminated Part 2 (1st ed.). Soundlikeyourself Publishing, LLC
