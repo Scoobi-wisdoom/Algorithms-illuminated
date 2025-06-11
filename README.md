@@ -1,5 +1,9 @@
 # Overview
-his README is about notes on Algorithms courses from [coursera - Divide and Conquer, Sorting and Searching, and Randomized Algorithms](https://www.coursera.org/learn/algorithms-divide-conquer?specialization=algorithms). This file uses LaTeX. Even though it is a lecture note, lecture contents not included in the textbooks were ignored.   
+his README is about notes on Algorithms courses of below:
+-  [coursera - Divide and Conquer, Sorting and Searching, and Randomized Algorithms](https://www.coursera.org/learn/algorithms-divide-conquer?specialization=algorithms).
+- [coursera - Graph Search, Shortest Paths, and Data Structures](https://www.coursera.org/learn/algorithms-graphs-data-structures/).
+
+This file uses LaTeX. Even though it is a lecture note, lecture contents not included in the textbooks were ignored.   
 
 However, problems in this repository are from text books Algorithm Illuminated.
 
@@ -7,6 +11,7 @@ However, problems in this repository are from text books Algorithm Illuminated.
 - problem 1.6 Karatsuba multiplication   
 - theorem 5.5 why it is $` 2^k `$   
 - problem 6.3 DSelect for the weighted median   
+- problem 8.9 application of Kosaraju by defining a directed graph with vertices and edges   
 
 # Divide and Conquer, Sorting and Searching, and Randomized Algorithms
 ## week 1 - Merge sort and worst case analysis
@@ -675,7 +680,7 @@ This follows by the fact that $` E[N] = \sum_{n = 0}^{\infty} n \cdot (\frac{1}{
 ```
 
 #### DSelect pseudo code
-- Input: array A of $` n \geq 1 `$ distinct numbers, and an integer $` i \in \set{1, 2, ..., n} `$.
+- Input: array A of $` n \geq 1 `$ distinct numbers, and an integer $` i \in \{1, 2, ..., n\} `$.
 - Output: the ith order statistic of A.
 ```text
  1  if n = 1 then
@@ -722,7 +727,7 @@ Thus, T(n) = O(n).
 #### Lemma 6.7
 For every input array of length $` n \geq 2 `$, the subarray passed to the recursive call in line 11 or 13 of DSelect has length at most $` \frac{7}{10}n `$.   
 Proof:   
-Let $` k = \frac{n}{5} `$ denote the number of groups of size 5. Also let x_i denote the median of each group where $` i \in \set {1, 2, ..., \frac{n}{5}} `$. Then, the median-of-medians is x_k/2 if k is even; otherwise, it is ⌈k/2⌉. By the drawing below, the median-of-medians is greater than at least 30% of elements in the input array.
+Let $` k = \frac{n}{5} `$ denote the number of groups of size 5. Also let x_i denote the median of each group where $` i \in \{1, 2, ..., \frac{n}{5}\} `$. Then, the median-of-medians is x_k/2 if k is even; otherwise, it is ⌈k/2⌉. By the drawing below, the median-of-medians is greater than at least 30% of elements in the input array.
 ```text
               | Group 1 |   ...   |Group k/2|   ...   | Group k |
               |---------|---------|---------|---------|---------|
@@ -748,7 +753,7 @@ Similarly, the median-of medians is less than at least 30% of elements in the in
 Thus, the subarray passed to the recursive call in line 11 or 13 is guaranteed to have at most $` \frac{7}{10}n `$.
 
 ### Problem 6.3
-Suppose an unsorted input array of length n consisting of distinct elements $` x_i `$ for $` i \in \set{1,2,..., n} `$. Each element $` x_i `$ has a positive weight $` w_i `$, and let $` W = \sum_{i = 1}^{n} w_i `$. Using DSelect, find an element $` x_k `$ such that  $` \sum_{x_i < x_k} w_i \leq \frac{W}{2} `$ and also $` \sum_{x_i > x_k} w_i  \leq \frac{W}{2} `$. Observe that there is either one or two such elements.   
+Suppose an unsorted input array of length n consisting of distinct elements $` x_i `$ for $` i \in \{1,2,..., n\} `$. Each element $` x_i `$ has a positive weight $` w_i `$, and let $` W = \sum_{i = 1}^{n} w_i `$. Using DSelect, find an element $` x_k `$ such that  $` \sum_{x_i < x_k} w_i \leq \frac{W}{2} `$ and also $` \sum_{x_i > x_k} w_i  \leq \frac{W}{2} `$. Observe that there is either one or two such elements.   
 - Input
   - A: the input array of length n
   - W: $` \sum_{i=1}^{n} w_i `$
@@ -822,6 +827,238 @@ It is trivial that all dens graphs are this case. Also, a sparse graph in which 
 ### Problem 7.3
 Suppose a directed graph G = (V,E) represented with adjacency lists, with each vertex storing an array of its outgoing edges (but not its incoming edges). Given a vertex $` v \in V `$, how many operations are required to identify the incoming edges of v?   
 By the operation in detail is checking all outgoing edges whose endpoint is v. So the number of edges, i.e. m, is to be parsed one by one. Thus it is $` \Theta(m) `$.
+
+# Graph Search, Shortest Paths, and Data Structures
+## week 1 - Breadth-first and depth-first search; computing strong components; applications.
+Graph Search Abstraction:   
+1. Goals
+  - Given a directed or undirected graph G = (V, E) and a starting vertex $` s \in V `$, identify all vertices reachable from s in G without permforming redundant work.
+  - A vertex $` v \in V `$ is said to be reachable from $` s `$ if there exists a path (i.e., a sequence of edges) from $` s `$ to $` v `$.
+2. Primitives: Operations such as visiting all vertices and edges can be done in O(n + m), where $` n=∣V∣ `$ and $` m=∣E∣ `$.
+3. Generic Algorithm (given graph G, vertex s)
+- mark s as explored; all the other vertices are unexplored.
+- while possible:
+  - **choose an edge (v, w)** such that $` v `$ is explored and $` w `$ is unexplored. The strategy for choosing the edge $` (v, w) `$ distinguishes different search algorithms.
+  - mark w explored.
+
+#### Proposition 8.1
+At the conclusion of GenericSearch algorithm, a vertex $` v \in V `$ is marked as explored if and only if there is a path from $` s `$ to $` v `$ in G.   
+Proof:   
+(⇒) if there is a path from $` s `$ to $` v `$, then $` v `$ is marked as explored.   
+Suppose there is a path from $` s `$ to $` v: s = v_0 → v_1 → \cdot\cdot\cdot → v_n`$, where $` (v_{i}, v_{i+1}) \in E `$ for $` i = 0, ..., n-1 `$. We show by induction that all vertices $` v_i `$ are marked as explored.
+- Base case: For $` i = 0, v_0 = s `$ is marked as explored by GenericSearch algorithm's initialization.
+- Inductive step: Assume $` v_k `$ is marked as explored for some $` k < n `$. Since $` (v_k, v_{k+1}) \in E `$, the GenericSeacrh algorighm marks $` v_{k+1} `$ as marked.
+
+(⇐) if $` v `$ is marked as explored, then there is a path from $` s `$ to $` v `$.   
+We prove by contradiction. Suppose $` v `$ is unexplored at the end of the algorithm but there exists a path from $` s `$ to $` v: s = v_0 → v_1 → \cdot\cdot\cdot → v_n`$, where $` (v_{i}, v_{i+1}) \in E `$. This means that there exists an edge $` (v_{k-1}, v_k) `$ for $` k \geq 1 `$ with $` v_{k-1} `$ explored and $` v_k `$ unexplored. By the definition of the algorithm, howver, this is impossible.  
+
+### Quiz 8.1
+Consider an undirected graph with $` n \geq 2 `$ vertices. What are the minimum and maximum number of different layers that the graph could have respectively?   
+2 and n.   
+
+Breadth-First Search (BFS) explores nodes in "layers" and runs in O(m + n) time using a queue (FIFO). Marking always occurs together with enqueuing. One important detail to remember is that all neighbors of the current vertex should be enqueued during the same iteration of the loop; otherwise, they will not be visited in the correct order, and may be skipped altogether.   
+
+#### Theorem 8.2
+For every undirected or directed graph G = (V, E) in adjacency-list representation and for every starting vertex $` s \in V `$:   
+(a) At the conclusion of BFS, a vertex $` v \in V `$ is marked as explored if and only if there is a path from $` s `$ to $` v `$ in G.   
+(b) The running time of BFS is O(m + n), where m = |E| and n = |V|.   
+(c) The running time of BFS's main while loop is $` O(m_s + n_s) `$, where $` m_s `$ and $` n_s `$ denote the number of edges and vertices, respectively, reachable from s in G.   
+Proof:   
+(a) and (b) follow from Preposition 8.1 and proof of (c), respectively. For part (c), observe that the BFS loop iterates over only those vertices and edges reachable from $` s `$. Each vertice is added to the queue and explored exactly once by GenericSearch algorithm, contributing $` O(n_s) `$ to the total running time. For each explored vertex, BFS iterates over its outgoing edges. Since edges reachable from the given vertex is processed at most twice (at most once in a directed graph), this contributes $` O(m_s) `$ time. Therefore, the total running time of the BFS loop is $` O(m_s + n_s) `$.  
+
+#### Theorem 8.3
+For every undirected or directed graph G = (V, E) in adjacency-list representation and for every starting vertex $` s \in V `$:   
+(a) At the conclusion of Augmented-BFS, for every vertex $` v \in V `$, the value of $` l(v) `$ equals the length $` dist(s, v) `$ of a shortest path from $` s `$ to $` v `$ in G (or $` +\infty `$, if no such path exists).   
+(b) The running time of Augmented-BFS is O(m + n), m = |E| and n = |V|.   
+Proof:   
+Two obervations proves part (a). First, with dist(s, v) = i, the vertex v is precisely in the i-th layer of the graph. Second, Augmented-BFS eventually sets $` l(w) = i `$ for every vertex in the i-th layer.   
+Part (b) follows from Theorem 8.2.   
+
+### Quiz 8.2
+Consider an undirected graph with n vertices and m edges. What are the minimum and maximum number of connected components that the graph could have, respectively?   
+1 and n.   
+
+An undirected connected component (UCC) is a maximal subset $` S ⊆ V `$ of vertices such that there is path from any vertex in S to any other vertex in S.   
+
+#### Theorem 8.4
+For every undirected graph G = (V, E) in adjacency-list representation:   
+(a) At the conclusion of UCC, for every pair of vertices $` u, v `$, $` cc(u) = cc(v) `$ if and only if $` u `$ and $` v `$ belong to the same connected component of G.   
+(b) The running time of UCC is O(m + n), where m = |E| and n = |V|.   
+Proof:   
+(a)   
+- (⇒) Suppose $` cc(u) = cc(v) `$. Then both vertices were marked during the same BFS traversal starting from some vertex $` s `$, meaning both are reachable from $` s `$, and hence from each other. So they belong to the same connected component.   
+- (⇐) Suppose $` u `$ and $` v `$ belong to the same connected component. Then there is a path between them. Since the BFS explores all vertices reachable from a starting vertex, they will be marked during the same BFS call and assigned the same component label.   
+Part (b) follows from Theorem 8.2(c).
+
+UCC is not only solved by BFS but also by DFS.
+
+Unlike BFS, where all elements in the queue are already marked as explored when enqueued, DFS works with a stack that may contain both explored and unexplored nodes. DFS can be implemented either iteratively or recursively. Interestingly, these two approaches result in opposite exploration orders. Why? Suppose a vertex $` s \in V `$ has $` k `$ unexplored neighbors: $` (s, v_1), (s, v_2), ..., (s, v_k) `$. In iterative DFS, these neighbors are pushed onto the stack in the order $` v_1, v_2, ..., v_k `$, so they will be popped and processed in reverse order: $` v_k, v_{k-1}, ..., v_1 `$. In recursive DFS, the neighbors are explored via recursive calls in the original order: $` v_1 `$ first, then $` v_2 ``, and so on.   
+
+#### Theorem 8.5
+For every undirected or directed graph G = (V, E) in adjacency-list representation and for every starting vertex $` s \in V `$ :   
+(a) At the conclusion of DFS, a vertex $` v \in V `$ is marked as explored if and only if there is a path from $` s `$ to $` v `$ in G.   
+(b) The running time of DFS is O(m + n), where m = |E| and n = |V|.   
+Proof:   
+Part (a) follows from GenericSearch. For part (b), by the fact that DFS examines each edge at most twice and also by the fact that a stack supports push/pop in a constant time, i.e. O(1), O(m) is calculated. The initialization requires O(n).   
+
+#### Topological ordering
+Let G = (V, E) be a directed graph. A topological ordering of G is an assignment $` f(v) `$ of every vertex $` v \in V `$ to a different number such that: for every $` (v, w) \in E `$, $` f(v) < f(w) `$.   
+
+### Quiz 8.3
+How many different topological orderings does the follwoing graph have? Use only the labels {1, 2, 3, 4}.   
+```text
+       v  
+     ↗   ↘
+    s     t
+     ↘   ↗
+       w
+```
+2   
+
+#### Directed Acyclic Graph
+A directed acyclic graph (DAG) denotes a directed graph without any directed circles.   
+
+A source vertex of a directed graph is a vertex with no incoming edges (a sink vertex is a vertex without outgoing edges).   
+
+#### Theorem 8.6
+Every directed acyclic graph has at least one topological ordering.   
+Proof:   
+Use Lemma 8.7 for proof. Since the given graph is a directed acyclic graph, it has at least one source vertex. Choose a source vertex $` v_1 `$ in G. Get G' from G by excluding $` v_1 `$ and all of its edges. Since removing a vertex does not add cycles, G' is also a directed acyclic graph. Repeat this process recursively: find a source in G', remove it, and so on. The only edges in G that are not also in G' are (outgoing) edges of $` v_1 `$. As a source vertex, $` v_1 `$ has no incoming edge, which leads to traveling forward in ordering. 
+
+#### Lemma 8.7
+Every directed acyclic graph has at least one source vertex.   
+Proof:   
+Choose a vertex in V of G = (V, E). If this vertex has no incoming edge, it is a source vertex. Continue iterating n times where |V| = n if not faced with a vertex without incoming edge, so that the found edges are $` (v_n, v_{n-1}), ..., (v_1, v_0) `$. Since there are exactly n number of vertices there exists a repeat in the sequence $` v_n, v_{n-1}, ..., v_0 `$, which contradicts definition of a directed acyclic graph.   
+
+```text
+topoSort given vertices of v, t, s, w. If marked it is annotated with a prime, i.e. '.
+
+steps:          input       traversals...
+                  v             v'            v'            v'            v'            v'            v'
+                ↗   ↘         ↗   ↘         ↗   ↘         ↗   ↘         ↗   ↘         ↗   ↘         ↗   ↘
+               s     t       s     t       s     t'      s     t'      s'    t'      s'    t'      s'    t'
+                ↘   ↗         ↘   ↗         ↘   ↗         ↘   ↗         ↘   ↗         ↘   ↗         ↘   ↗
+                  w             w             w             w             w             w'            w'
+
+vertex on traversal:            v             t             v             s             w             s
+f(s):                                                                                                 1
+f(v):                                                       3
+f(w):                                                                                   2
+f(t):                                         4
+curLabel:         4             4             3             2             2             1             0
+
+Notice that f-value setting and decrement of curLabel happen together.
+```
+
+#### Theorem 8.8
+For every directed acyclic graph G = (V, E) in adjacency-list representation:   
+(a) At the conclusion of TopoSort, every vertex $` v `$ has been assigned an f-value, and these f-values constitute a topological ordering of G.   
+(b) The running time of TopoSort is O(m + n), where m = |E| and n = |V|.   
+Proof:   
+For part (b) each vertex is explored only once, and therefore a constant number of operations are performed on each vertex or edge. For part (a), i.e. for correctness, note that DFS-Topo assigns $` f(v) `$ and decrements `curLabel` value at its completion. This guarantees unique $` f(v) `$ values. Now, it is to be shown that for every edge $` (v, w) \in E `$, it holds that $` f(v) < f(w) `$. There are two cases in one of which $` v `$ is discovered before $` w `$ and in the other which $` w `$ is discoverd earlier. For the first case, DFS-Topo is called on $` v `$ recursively calling DFS-Top on $` w `$ before completing. Because DFS-Topo on $` w `$ completes before DFS-Topo on $` v `$, $` f(v) < f(w) `$. For the second case, DFS-Topo on $` w `$ completes without traversing back to $` v `$ because G is a directed acyclic graph. Hence DFS-Topo on $` v `$ is runs after DFS-Topo on $` w `$ has completed, and again $` f(v) < f(w) `$.   
+
+#### Strongly Connected Component
+A strongly connected component (SCC) of a directed is a maximal subset $` S ⊆ V `$ such that there is a directed path from any vertex in S to any other vertex in S.   
+
+Between SCCs, if each is converted into a single vertex, they are directed acyclic graph.   
+
+#### Proposition 8.9
+Let G = (V, E) be a directed graph. Define the corresponding meta-graph H = (X, F) with one meta-vertex $` x \in X `$ per SCC of G and a meta-edge $` (x, y) `$ in F whenever there is an edge in G from a vertex in the SCC corresponding to $` x `$ to one in the SCC corresponding to $` y `$. Then H is a directed acyclic graph.   
+```text
+More intuitively, 
+SCC1 consisting of v1, v2 and v3 is abstracted to be x. 
+SCC2 consisting of w1, w2 and w3 is abstracted to be y.
+```
+Proof:   
+We prove by contradiction. Assume that H has a directed cycle with $` k \geq 2 `$ vertices. This means there are distinct SCCs, $` S_1, S_2, ..., S_k `$. Now, because there is a cycle in H, there is a sequence of SCCs such that there is a path from $` S_1 `$ to $` S_2 `$, from $` S_2 `$ to $` S_3 `$, and so on, eventually returning back to $` S_1 `$. That is, in the original graph G, there exists a path from any vertex in $` S_1 `$ to some vertex in $` S_2 `$, then to $` S_3 `$, ..., and finally back to $` S_1 `$. This implies a single SCC, not $` k `$ number of SCCs.   
+
+### Quiz 8.5
+Consider a directed acyclic graph G = (V, E) with |V| = n and |E| = m. What are the minimum and maximum number of strongly connected components that the graph could have, respectively?   
+n and n   
+```text
+Unlike Proposition 8.9, it is not a directed graph but a directed acyclic one. 
+```
+
+#### Theorem 8.10
+Let G be a directed graph, with the vertices ordered arbitrarily, and for each vertex $` v \in V `$ let $` f(v) `$ denote the position of $` v `$ computed by the TopoSort algorithm. Let $` S_1, S_2 `$ denote two SCCs of G, and suppose G has an edge $` (v, w) `$ with $` v \in S_1 `$ and $` w \in S_2 `$. Then, 
+```math
+\begin{align}
+\min_{x \in S_1} f(x) < \min_{y \in S_2} f(y)
+\end{align}
+```
+Proof:   
+Suppose two cases. First, assume that vertices in $` S_1 `$ are discovered before those of $` S_2 `$. Since there is an edge $` (v, w) `$ from $` S_1 `$ to $` S_2 `$, the TopoSort traversal starting from $` v \in S_1 `$ will eventually explore $` w \in S_2 `$. This causes the TopoSort algorithm to traverse all of $` S_2 `$ before finishing $` S_1 `$. Thus, all vertices in $` S_2 `$ receive f-values before any vertex in $` S_1 `$. Since the TopoSort algorithm assigns f-values in decreasing order, $` S_1 `$ ends up with smaller f-values than $` S_2 `$. For the last case, suppose that vertices in $` S_2 `$ are discovered before $` S_1 `$. Because G is a directed graph and $` S_1, S_2 `$ are distinct SCCs, and because there is an edge from $` S_1 `$ to $` S_2 `$, there cannot be a path from any vertex in $` S_2 `$ to any vertex in $` S_1 `$. Otherwise, they would belong to the same SCC. Thus, the TopoSort started in $` S_2 `$ cannot reach $` S_1 `$. The TopoSort algorithm assigns f-values to all vertices in $` S_2 `$ and completes. Then, it eventually starts on $` S_1 `$. Since the `curLabel` is decreasing, vertices in $` S_1 `$ receive smaller f-values than those in $` S_2 `$.   
+
+#### Corollary 8.11
+Let $` G `$ be a directed graph, with the vertices ordered arbitrarily, and for each vertex $` v \in V `$ let $` f(v) `$ denote the position of $` v `$ computed by the TopoSort algorithm on the reversed graph $` G^{rev} `$. Let $` S_1, S_2 `$ be two SCCs of $` G `$, and suppose $` G `$ has an edge $` (v, w) `$ with $` v \in S_1 `$ and $` w \in S_2 `$. Then,
+```math
+\begin{align}
+\min_{x \in S_1} f(x) > \min_{y \in S_2} f(y)
+\end{align}
+```
+
+G has directed cycle -> no topological ordering.    
+every directed acyclic graph has a sink vertex.   
+
+### Quiz 8.6
+Let $` G `$ be a directed graph and $` G^{rev} `$ a copy of $` G `$ with the direction of every edge reversed. How are the SCCs of $` G `$ and $` G^{rev} `$ related?
+- Every source SCC of $` G `$ is also a source SCC of $` G^{rev} `$.
+- Every sink SCC of $` G `$ becomes a source SCC of $` G^{rev} `$.
+
+#### Kosaraju
+```text
+G:
+               1  ←  2  →  4  →  5
+                ↘   ↗       ↖   ↙ 
+                  3           6
+reversed G:
+               1  →  2  ←  4  ←  5
+                ↖   ↙       ↘   ↗ 
+                  3           6
+One topological ordering is: f(1) = 4, f(2) = 5, f(3) = 6, f(4) = 1, f(5) = 3, f(6) = 2.
+
+Applying this to G results in below.
+G with (f-value):
+               1(4) ←  2(5)  →  4(1) →  5(3)
+                  ↘   ↗            ↖   ↙ 
+                   3(6)             6(2)
+vertex 4 is a sink.
+
+
+G with (SCC number):
+               1(2) ←  2(2) →  4(1) → 5(1)
+                 ↘    ↗          ↖    ↙ 
+                  3(2)            6(1)
+In increasing order of f-values, execute the DFS-SCC algorithm and each loop assign the same SCC-value.
+```
+
+#### Theorem 8.12
+For every directed graph G = (V, E) in adjacency-list representations:   
+(a) At the conclusion of Kosaraju, for every pair $` v,w `$ of vertices, $` scc(v) = scc(w) `$ if and only if $` v `$ and $` w `$ belong to the same strongly connected component of G.   
+(b) The running time of Kosaraju is O(m + n), where m = |E| and n = |V|.   
+Proof:   
+For part (b), since DFS is performed twice, the running time is O(m + n). For part (a), consider a vertex $` v `$ in SCC $` S_1 `$ as a starting vertex of a DFS-SCC call. By Corollary 8.11, for any edge from $` v `$ to a different SCC $` S_2 `$, there must be at least one vertex in $` S_2 `$ with a smaller f-value than $` f(v) `$. Since DFS-SCC is called in increasing order of f-values, $` S_2 `$ has already been explored by the time $` v `$ is processed. This means DFS-SCC initiated from $` v `$ remains within $` S_1 `$. Also, by the definition of SCC and DFS, the subroutine explores every vertex in the current SCC, resulting in assigning the same SCCNumber to all the vertices of the current SCC.   
+
+### Problem 8.5
+Let G be a directed graph but not acyclic. The TopoSort algorithm does not compute a topological ordering of G since none exists. Does it compute an ordering that minimizes the number of edges that travel backward?   
+Not always but sometimes yes.   
+
+### Problem 8.6
+Given a directed graph G, if you add one new edge, whwat would happen to the number of SCCS?   
+...might or might not remain the same (depending on G and the new edge). Also, cannot increase.   
+
+### Problem 8.7
+Kosaraju has two DFS subroutines. First to calculate f-values on the reversed graph, and second to get SCCs. Is BFS applicable as a replacement?   
+Only for the second DFS subroutine, the BFS algorithm could be used instead of DFS.   
+
+### Problem 8.8
+Kosaraju has two passes of DFS. Below are all true.
+- (a) if f-values are computed in increasing order in the first pass, and in the second pass verteices are considered in decreasing order, the Kosaraju algorithm remains correct.
+- (b) Using the original graph in the first pass and the reversed graph in the second pass, the Kosaraju algorithm remains correct.
+
+### Problem 8.9
+There are a set of clauses, each of which is the disjunction (logical "or") of two literals. (A literal is a Boolean variable or the negation of a Boolean variable.) A value of "true" or "false" is to be assigned to variables so that all the clauses are satisfied. For example, if the input contains the three clauses X1 ∨ X2, ¬X1 ∨ X3, and ¬X2 ∨ ¬X3, then one way to satisfy all of them is to set X1 and X3 to "true" and X2 to "false." Design an algorithm that determines whether or not a given 2SAT instance has at least one satisfying assignment with the running time of O(m + n) time, where m and n are the number of clauses and variables, respectively.   
+-> It is important to figure out for each variable there possibly exist two literals which should be vertices of a directed graph.   
 
 # References
 - Tim Roughgarden. (2018)  Algorithms Illuminated Part 1 (1st ed.). Soundlikeyourself Publishing, LLC
