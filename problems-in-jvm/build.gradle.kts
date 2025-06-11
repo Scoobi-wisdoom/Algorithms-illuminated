@@ -15,6 +15,7 @@ dependencies {
 
 tasks.test {
     useJUnitPlatform()
+    jvmArgs("-Xmx2g", "-Xms1g", "-Xss256m")
 }
 kotlin {
     jvmToolchain(17)

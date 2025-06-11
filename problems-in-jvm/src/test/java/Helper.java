@@ -29,9 +29,23 @@ public class Helper {
             throw new IllegalArgumentException("File not found: " + fileName);
         }
 
-        try (BufferedReader reader  = new BufferedReader(new InputStreamReader(inputStream))) {
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
             return reader.lines()
                     .collect(Collectors.joining());
+        }
+    }
+
+    public static String readEdge(String fileName) throws IOException {
+        final InputStream inputStream = Helper.class.getClassLoader().getResourceAsStream(fileName);
+
+        if (inputStream == null) {
+            throw new IllegalArgumentException("File not found: " + fileName);
+        }
+
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
+            return reader.lines()
+                    .map(String::trim)
+                    .collect(Collectors.joining("\n"));
         }
     }
 }
