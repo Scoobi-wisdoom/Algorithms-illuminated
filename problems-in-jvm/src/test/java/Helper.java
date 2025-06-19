@@ -22,7 +22,7 @@ public class Helper {
         }
     }
 
-    public static String readString(String fileName) throws IOException {
+    public static String readDecimal(String fileName) throws IOException {
         final InputStream inputStream = Helper.class.getClassLoader().getResourceAsStream(fileName);
 
         if (inputStream == null) {
