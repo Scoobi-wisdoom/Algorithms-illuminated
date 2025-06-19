@@ -11,7 +11,7 @@ However, problems in this repository are from text books Algorithm Illuminated.
 - problem 1.6 Karatsuba multiplication   
 - theorem 5.5 why it is $` 2^k `$   
 - problem 6.3 DSelect for the weighted median   
-- problem 8.9 application of Kosaraju by defining a directed graph with vertices and edges   
+- problem 9.8 application of Dijkstra by defining conditions of the while loop   
 
 # Divide and Conquer, Sorting and Searching, and Randomized Algorithms
 ## week 1 - Merge sort and worst case analysis
@@ -892,7 +892,7 @@ Part (b) follows from Theorem 8.2(c).
 
 UCC is not only solved by BFS but also by DFS.
 
-Unlike BFS, where all elements in the queue are already marked as explored when enqueued, DFS works with a stack that may contain both explored and unexplored nodes. DFS can be implemented either iteratively or recursively. Interestingly, these two approaches result in opposite exploration orders. Why? Suppose a vertex $` s \in V `$ has $` k `$ unexplored neighbors: $` (s, v_1), (s, v_2), ..., (s, v_k) `$. In iterative DFS, these neighbors are pushed onto the stack in the order $` v_1, v_2, ..., v_k `$, so they will be popped and processed in reverse order: $` v_k, v_{k-1}, ..., v_1 `$. In recursive DFS, the neighbors are explored via recursive calls in the original order: $` v_1 `$ first, then $` v_2 ``, and so on.   
+Unlike BFS, where all elements in the queue are already marked as explored when enqueued, DFS works with a stack that may contain both explored and unexplored nodes. DFS can be implemented either iteratively or recursively. Interestingly, these two approaches result in opposite exploration orders. Why? Suppose a vertex $` s \in V `$ has $` k `$ unexplored neighbors: $` (s, v_1), (s, v_2), ..., (s, v_k) `$. In iterative DFS, these neighbors are pushed onto the stack in the order $` v_1, v_2, ..., v_k `$, so they will be popped and processed in reverse order: $` v_k, v_{k-1}, ..., v_1 `$. In recursive DFS, the neighbors are explored via recursive calls in the original order: $` v_1 `$ first, then $` v_2 `$, and so on.   
 
 #### Theorem 8.5
 For every undirected or directed graph G = (V, E) in adjacency-list representation and for every starting vertex $` s \in V `$ :   
@@ -1060,6 +1060,78 @@ Kosaraju has two passes of DFS. Below are all true.
 There are a set of clauses, each of which is the disjunction (logical "or") of two literals. (A literal is a Boolean variable or the negation of a Boolean variable.) A value of "true" or "false" is to be assigned to variables so that all the clauses are satisfied. For example, if the input contains the three clauses X1 ∨ X2, ¬X1 ∨ X3, and ¬X2 ∨ ¬X3, then one way to satisfy all of them is to set X1 and X3 to "true" and X2 to "false." Design an algorithm that determines whether or not a given 2SAT instance has at least one satisfying assignment with the running time of O(m + n) time, where m and n are the number of clauses and variables, respectively.   
 -> It is important to figure out for each variable there possibly exist two literals which should be vertices of a directed graph.   
 
+## week 2 - Dijkstra's shortest-path algorithm
+Dijkstra is for single-source shortest path problems.   
+
+Here, Dijkstra's algorithm is applied on a directed graph but with slight modifications it also solves undirected graph's shortest path problem. BFS is an alternative to Dijiktra only if all lengths are 1. BFS could still work by spliting lengths into 1 but only if the number is not big, since big lengths cause increase the running time of O(m + n).      
+
+The key smart idea of Dijkstra's algorithm is the way how to choose the next vertex.   
+
+```text
+        v                (s, v): 1
+     ↗  |  ↘             (v, t): 6
+   s    |    t           (v, w): 2
+     ↘  ↓  ↗             (s, w): 4
+        w                (w, t): 3
+
+0. Initialize: len(s) = 0
+
+1.
++---------+           +-------------+
+|   X     |           |    V - X    |
+|---------|           |-------------|   
+|     ──────────────────▶ v         |   len(s) + l_sv = 0 + 1 = 1 → vertex v is chosen and set len(v) = 1
+|   s     |           |             |
+|     ──────────────────▶ w         |   len(s) + l_sw = 0 + 4 = 4
++---------+           +-------------+
+It is one and only one vertex added to X at each loop.
+
+2.
++---------+           +-------------+
+|   X     |           |    V - X    |
+|---------|           |-------------|
+|   s ──────────────────▶           |   len(s) + l_sw = 0 + 4 = 4
+|         |           |   w         |
+|     ──────────────────▶           |   len(v) + l_vw = 1 + 2 = 3 → vertex w is chosen and set len(w) = 3
+|   v     |           |             |
+|     ──────────────────▶ t         |   len(v) + l_vt = 1 + 6 = 7   
++---------+           +-------------+
+
+and so on...
+```
+
+#### Theorem 9.1
+For every directed graph G = (V, E), every starting vertex $` s `$, and every choice of nonnegative edge lengths, at the conclusion of Dijkstra, $` len(v) = dist(s, v) `$ for every vertex $` v \in V `$.   
+Proof:   
+We use mathematical induction. Let P(k) be a statement of "for the k-th vertex $` v `$ added to the set X in Dijkstra $` len(v) = dist(s, v) `$". The base case holds since a starting vertex s is with $` dist(s, s) = len(s) = 0 `$. As part of induction process, assume P(k-1) holds with the k-1 vertex $` v^* `$ added to the set X. Now for the k vertex $` w^* `$ added to the set X and let $` (v^*, w^*) `$ be the chosen edge in the corresponding iteration, $` len(w^*) = dist(s, w^*) `$ to be shown. Since there is an edge $` (v^*, w^*) `$, there is a path $` P^* `$ from $` s `$ to $` w^* `$ which is through $` s `$ to $` v^* `$ and then finally to $` w^* `$. This path has a length $` len(w^*) `$ and by the definition of $` dist(s, w^*) `$, which is the shortest path between $` s `$ and $` w^* `$,
+```math
+dist(s, w^*) \leq len(w^*)
+```
+Now, let $` P' `$ be a some path travels from $` s `$ to $` w^* `$ of $` s `$ to $` y `$ and then from $` y `$ to $` z `$ and to $` w^* `$ with $` y \in X `$ and $` z \in V-X `$. The three parts of the travel are:
+- $` s `$ to $` y `$'s length $` \geq dist(s, y) = len(y)`$
+- $` y `$ to $` z `$'s length $` = l_{yz} `$
+- $` z `$ to $` w^* `$''s length is unknown but nonnegative.
+```math
+\begin{align}
+\text{The length of } P' \geq len(y) + l_{yz} + 0 \\
+= \text{Dijkstra score of } z \\
+\geq len(v^*) + l_{v^*w^*} \\
+\end{align}
+```
+The last ineqaulity holds since at the corresponding iteration of Dijkstra, the edge $` (v^*, w^*) `$ is chosen over $` (y, z) `$.   
+
+#### Proposition 9.2
+For every directed graph G = (V, E), every starting vertex s, and every choice of nonnegative edge lengths, the straightforward implementation of Dijkstra runs in O(mn) time, where m = |E| and n = |V|.   
+
+Without Heap, Dijkstra's running time is $` \Theta(mn) `$. But if the heap data structure is used, it is $` O(m\log n) `$    
+
+### Problem 9.1
+Consider a directed graph with distinct and nonnegative edge lengths and a source vertex s. Fix a destination vertex t, and assume that the graph contains at least one s-t path. Which of the following statements are true? [Check all that apply.]   
+(Wrong) The shortest s-t path must include the minumum length edge of G.   
+
+### Problem 9.5
+Consider a directed graph G and a source vertex s. Suppose G has some negative edge lengths but no negative cycles, meaning G does not have a directed cycle in which the sum of the edge lengths is negative. Suppose you run Dijkstra's algorithm on G (with source s). Which of the following statements are true? [Check all that apply.]   
+Dijkstra's algorithm always terminates, and in some cases the paths it computes will be the correct shortest paths from s to all other vertices.
 # References
 - Tim Roughgarden. (2018)  Algorithms Illuminated Part 1 (1st ed.). Soundlikeyourself Publishing, LLC
 - Tim Roughgarden. (2018)  Algorithms Illuminated Part 2 (1st ed.). Soundlikeyourself Publishing, LLC
