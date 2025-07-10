@@ -16,10 +16,13 @@
 - [String.join()](/problems-in-jvm/src/main/java/JavaChapter8Problem10.java)
 - [flatMap(Collection::stream)](/problems-in-jvm/src/main/java/JavaChapter8Problem10.java)
 - Convert primitive array into boxed one
-  - [ Arrays.stream(fValues).boxed().collect(Collectors.toCollection(ArrayList::new))](/problems-in-jvm/src/main/java/JavaChapter8Problem10.java)
+  - [Arrays.stream(fValues).boxed().collect(Collectors.toCollection(ArrayList::new))](/problems-in-jvm/src/main/java/JavaChapter8Problem10.java)
 - Collectors.joining()
   - [Helper](/problems-in-jvm/src/test/java/Helper.java) 
   - [JavaChapter8Problem10](/problems-in-jvm/src/main/java/JavaChapter8Problem10.java)
+- [AbstractMap.SimpleEntry](/problems-in-jvm/src/main/java/JavaChapter9Problem8.java)
+- [Collectors.toMap](/problems-in-jvm/src/main/java/JavaChapter9Problem8.java)
+
 ## Kotlin
 - [substring with a single or two parameters](/problems-in-jvm/src/main/kotlin/Chapter1Problem6.kt) 
 - [padStart](/problems-in-jvm/src/main/kotlin/Chapter1Problem6.kt)
@@ -27,3 +30,4 @@
 - [IntArray.copyOf()](/problems-in-jvm/src/test/kotlin/Chapter5Problem6Test.kt)
 - [IntArray?.contentEquals](/problems-in-jvm/src/test/kotlin/Chapter5Problem6Test.kt)
 - [List.chunked](/problems-in-jvm/src/test/kotlin/Chapter6Problem5.kt)
+- [Iterable<Pair<K, V>>.toMap()](/problems-in-jvm/src/main/kotlin/Chapter9Problem8.kt)

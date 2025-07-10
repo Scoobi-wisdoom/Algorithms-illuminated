@@ -125,7 +125,7 @@ class Chapter6Problem5Test {
     )
         .map { it.toLong() }
         .toTypedArray()
-    private val piDecimals = Helper.readString("problem6.5_pi1000000.txt")
+    private val piDecimals = Helper.readDecimal("problem6.5_pi1000000.txt")
         .drop(2)
         .chunked(10)
         .map { it.toLong() }
