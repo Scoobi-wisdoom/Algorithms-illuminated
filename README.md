@@ -1132,6 +1132,125 @@ Consider a directed graph with distinct and nonnegative edge lengths and a sourc
 ### Problem 9.5
 Consider a directed graph G and a source vertex s. Suppose G has some negative edge lengths but no negative cycles, meaning G does not have a directed cycle in which the sum of the edge lengths is negative. Suppose you run Dijkstra's algorithm on G (with source s). Which of the following statements are true? [Check all that apply.]   
 Dijkstra's algorithm always terminates, and in some cases the paths it computes will be the correct shortest paths from s to all other vertices.
+
+## week 3 Heaps
+#### Theorem 10.1 
+In a heap with n objects, the Insert and ExtractMin operations run in O(log n) time.   
+
+#### Theorem 10.2
+In a heap with n objects, the FindMin, Heapify, and Delete operations run in O(1), O(n), and O(log n) time, respectively.   
+
+#### Theorem 10.3
+For every input array of length $` n \geq 1 `$, the running time of HeapSort is $` O(n\log n) `$.   
+
+One of heap applications is the median maintenance problem, in which with a given sequence of numbers, one by one, the median should be calculated. With invariants of balanced and ordered two heaps, H1 and H2, the median is max(H1) or max(H2).
+- balanced: after an even round, H1 and H2 have the same number of elements. After an odd round, one of H1 and H2 has exactly one more element than the other does.
+- ordered: max(H1) < min(H2)   
+```text
+1. median calculation
+FindMax(H1) or FindMin(H2) with O(1) for both.
+
+2. If the first invariant is violated
+execute H1.Insert(H2.ExtractMin()) or H2.Insert(H1.ExtractMax()), resulting in O(log n).
+```
+
+#### Theorem 10.4
+For every directed graph G = (V, E), every starting vertex s, and every choice of nonnegative edge lengths, the heap-based implementation of Dijkstra runs in $` O((m + n) \log n) `$ time, where m = |E| and n = |V|.   
+
+A heap H in Dijkstra consists of vertices sorted by their keys. For example, for $` V = \{s, a, b\} `$ the initial state of H is:
+```text
+H initial state
+     (s, 0)
+    /       \
+  (a, ∞)   (b, ∞)
+```
+since at the beginning only the starting vertex's key is initialized as 0.   
+
+#### HeapSort
+HeapSort uses a heap to sort an input array by executing Insert for all elements of the input and then by performing ExtractMin exhaustively on the heap.   
+
+The core concept of Dijkstra with a heap is to assure as an invariant that the subroutine ExtractMin() returns a vertex $` w `$ such that
+```math
+\begin{align}
+key(w) = \min_{(v, w) \in E \text{ : }v \in X} len(v) + l_{vw}
+\end{align}
+```
+Be aware that this condition does not apply to the starting vertex since at the beginning of the algorithm the set X is empty. Neverthless, ExtractMin() surely returns vertex s since H is sorted by keys of the vertices, and also because key(s) is set to 0 already at the beginning of the algorithm.
+
+```text
+1. Case of the starting vertex after setting key(s) = 0
++---------+           +-------------+
+|   X     |           |    V - X    |
+|---------|           |-------------|
+|         |           |   s         |   H.extractMin() returns s.
+|         |           |   u         |
+|         |           |   v         |
+|         |           |   w         |   
++---------+           +-------------+
+
++---------+           +-------------+
+|   X     |           |    V - X    |
+|---------|           |-------------|
+|     ──────────────────▶ u         |
+|   s     |           |             |   key(u) and key(w) are updated.
+|     ──────────────────▶ w         |     This is to assure the invariant.
++---------+           +-------------+
+
+
+2. General case except for the starting vertex s
++---------+           +-------------+
+|   X     |           |    V - X    |
+|---------|           |-------------|   
+|     ──────────────────▶ v         |   
+|   u     |           |             |   H.extractMin() returns v.
+|     ──────────────────▶ w         |   
+|         |           |             |
+|         |           |   t         |
++---------+           +-------------+
+
++---------+           +-------------+
+|   X     |           |    V - X    |
+|---------|           |-------------|
+|   u     |           |             |
+|         |           |             |
+|     ──────────────────▶ w         |
+|   v     |           |             |   key(w) and key(t) are updated.
+|     ──────────────────▶ t         |     This is to assure the invariant.
++---------+           +-------------+
+```
+
+### Quiz 10.2
+The number of executions of a logic to maintain Dijkstra's invariant is (with a directed graph G = (V, E) in adjacency-list representation, m = |E| and n = |V|):   
+O(m), because for each edge (u, v), key(v) maybe updated once via a Delete + Insert pair, and there are at most m edges to process.   
+
+#### heap implmentation details
+A heap is visualized as a tree but implemented as an array. Since a heap is supposed to be a complete binary tree, an array represents the heap enough, which let accessing the k-th node (by index) takes $` O(1) `$ time, since the heap is stored in an array. By contrast, search trees are not assumed to be full. Hence, a heap requires less memory space than a search tree does.   
+
+Insert and ExtractMin of a heap are implemented by:
+- Maintain Full Tree Structure (the last element of the heap array, at the last level of the tree, plays a key role)
+- Maintain Key Order (maintained by swaps)
+
+|                | Maintain Full Tree Structure                                       | Maintain Key Order                                                      |
+|----------------|--------------------------------------------------------------------|-------------------------------------------------------------------------|
+| **Insert**     | Add element at the end of array (next open leaf in heap tree)      | Bubble up: swap with parent until parent is smaller                     |
+| **ExtractMin** | Remove root, move last element to root to maintain completeness    | Bubble down: swap with the smaller child until heap property is restored|
+
+Since each swap takes constant time and at most $` \log n `$ swaps are needed (equal to the height of the tree), both Insert and ExtractMin operations run in $` O(\log n) `$ time.   
+
+### Problem 10.1
+A heap data structure could give a significant improvement on   
+Wrong: Repeated lookups.
+
+### Problem 10.5
+For each vertex $` v \in V `$ compute the smallest bottleneck of an $` s `$-$` v `$ path in $` O((m + n) \log n) `$ time using a Dijkstra-like algorithm.
+- Explanation: A bottleneck of a paht is the maximum edge length along that path. The smallest bottleneck of an $` s `$-$` v `$ path means the minumum value among all such maximum edge lengths over every possible path from $` s `$ to $` v `$. This can be computed using a heap-based approach similar to Dijkstra's algorithm, with the key difference of $` len(v) `$ meaning a bottleneck value instead of the sum of distances. The new potential bottleneck is computed as $` key(y) := \min( key(y), \max\ ( len(w^*),\ l_{w^* y} )) `$.
+
+### Problem 10.6
+In which algorithm can you compute the minumum-bottleneck path between two vertices in an undirected graph in $` O(m + n) `$ time?   
+
+### Problem 10.7
+Is it possible to compute the minimum-bottleneck path between two given vertices in a directed graph faster than $` O(m + n) \log n `$ time?   
+
 # References
 - Tim Roughgarden. (2018)  Algorithms Illuminated Part 1 (1st ed.). Soundlikeyourself Publishing, LLC
 - Tim Roughgarden. (2018)  Algorithms Illuminated Part 2 (1st ed.). Soundlikeyourself Publishing, LLC
