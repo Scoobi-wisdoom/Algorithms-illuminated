@@ -1,5 +1,5 @@
 # Overview
-his README is about notes on Algorithms courses of below:
+This README is about notes on Algorithms courses of below:
 -  [coursera - Divide and Conquer, Sorting and Searching, and Randomized Algorithms](https://www.coursera.org/learn/algorithms-divide-conquer?specialization=algorithms).
 - [coursera - Graph Search, Shortest Paths, and Data Structures](https://www.coursera.org/learn/algorithms-graphs-data-structures/).
 
@@ -1250,6 +1250,38 @@ In which algorithm can you compute the minumum-bottleneck path between two verti
 
 ### Problem 10.7
 Is it possible to compute the minimum-bottleneck path between two given vertices in a directed graph faster than $` O(m + n) \log n `$ time?   
+
+## week 3 Search Trees
+A balanced search tree (BST) is more practical than a sorted array for searches since in real-world applications, where data is typically dynamic and subject to frequent insertions and deletions.   
+
+| Operation             | Sorted Array                        | Balanced Search Tree |
+| --------------------- | ----------------------------------- | ---------------------|
+| Insert                | O(n)                                | O(log n)             |
+| Delete                | O(n)                                | O(log n)             |
+| Search                | O(log n)                            | O(log n)             |
+| Find Min/Max          | O(1)                                | O(log n)             |
+| Predecessor/Successor | if index known O(1) else O(log n)   | O(log n)             |
+| OutputSorted          | O(n)                                | O(n)                 |
+| Select                | O(1)                                | O(log n)             |
+| Rank                  | O(log n)                            | O(log n)             |
+
+Search: to return a pointer to an object with the key given as an argument.   
+Select: to return the object in the ith position when i is given as an argument.   
+
+Note that it is a "balanced" search tree not a search tree. For a search tree, the worst-case running time of the Search (or Insert) operation containing n keys is $` \Theta(height) `$. The height of a binary search tree ranges between $` \log_2 n `$ (in a balanced tree) and $` n - 1 `$ (in the worst case of an unbalanced tree). Also, Each node has a height, defined as the longest path from that node to a leaf. The height of the tree is the height of the root, which is the maximum among all nodes.   
+
+Search Tree properties for every node:
+```text
+               x
+            /     \
+       ┌───────┐ ┌───────┐
+       │       │ │       │
+       │  ≤ x  │ │  > x  │
+       │       │ │       │
+       └───────┘ └───────┘
+for all subtrees
+```
+Since a search tree, for each node, saves pointers of itself and children, it takes more space in memory compared to heaps by a constant factor.
 
 # References
 - Tim Roughgarden. (2018)  Algorithms Illuminated Part 1 (1st ed.). Soundlikeyourself Publishing, LLC
