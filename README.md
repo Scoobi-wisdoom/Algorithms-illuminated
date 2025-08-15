@@ -1283,6 +1283,135 @@ for all subtrees
 ```
 Since a search tree, for each node, saves pointers of itself and children, it takes more space in memory compared to heaps by a constant factor.
 
+## week 4 Hash Tables
+A hash table uses space linear in the number of objects stored.   
+
+| Operation             | Typical running time  |
+| --------------------- | ----------------------|
+| Insert                | O(1)                  |
+| Lookup                | O(1)*                 |
+| Delete                | O(1)*                 |
+
+(*) Lookup and Delete operations have O(1) running time if and only if the hash table is properly implemented (with a good hash function and an appropriate table size) and the data is non-pathological.   
+
+Instead of a universe U of all possible keys, a set S of keys are stored in a hash table drawn from U. The size S (s subset of U) is manageable compared to the astronomical size of U.   
+
+#### Hash Functions
+A hash function $` h: U → \{0, 1, 2, ..., n-1 \} `$ assigns every key from the universe $` U `$ to a position in an array of length n.   
+
+#### Collisions
+Two keys $` k_1 `$ and $` k_2 `$ from $` U `$ collide under the hash function $` h `$ if $` h(k_1) = h(k_2) `$.   
+
+### Quiz 12.3
+Find $` n `$ such that the probability is at least 50% that two people among $` n `$ have the same birthday. Suppose birthdays are uniformly distributed.   
+23   
+
+What the birthday paradox tells you is that hash tables inevitably have collisions. In other words, even if there are a lot of positions not assigned with any keys yet, there are high chances of collisions and sometimes there must be. Typical collision resolutions are chaining and open addressing.   
+|              | Chaining                              | Open Addressing                                                                |
+| -------------| ------------------------------------- | -------------------------------------------------------------------------------|
+| How to       | h: U → a bucket (Linked List)         | prob sequences (ex: linear probing, double hashing etc.) in case of collisions |
+| Cons         | takes more space than Open Addressing | more complicated when it comes to deletions than chaining                      |
+
+#### Pathological Data Sets
+For every hash function $` h: U → \{0, 1, 2, ..., n-1 \} `$ there exists a set $` S `$ of keys of size $` |U|/n `$ such that $` h(k_1) = h(k_2) `$ for every $` k_1, k_2 \in S `$.   
+Because of existence of pathological data sets, there is no hash function perfect for every data set. This is why we don't say worst case when it comes to time complexity of hash table's operations and instead only given the input assumption.   
+
+### Quiz 12.5
+Why is it impractical to use a completely random choice of a hash function?   
+It would take too much space to store and it would take too much time to evaluate.   
+Not that it is not deterministic.   
+
+load of a hash table $` \alpha  = \frac{\text{number of objects stored}}{\text{array length n}} `$
+
+### Quiz 12.6
+Which hash table strategy is feasible for loads larger than 1 between chaining and open addressing?    
+Only chaining since open addressing needs empty space in the given array of length n by definition but with a load larger than 1, there is no empty space.   
+
+Given perfectly evenly distributed data set, the running time of Lookup operations is:
+- Chaining $` O(⌈\alpha⌉) `$
+- Open addressing (double hashing) $` O(\frac{1}{1-\alpha}) `$
+- Open addressing (linear probing) $` O(\frac{1}{(1-\alpha)^2}) `$.   
+
+The load of a hash table should be kept as $` \alpha \lt\lt 1 `$ for good performance. For this resizing should happen depending on a rule of thumb threshold, say 70%.   
+
+### Universal Hash Function Quiz  
+Consider a hash function family H, where each hash function of H maps elements from a universe U to one of in buckets. Suppose H has the following property: for every bucket i and key k, a 1/n fraction of the hash functions in H map k to i. Is H universal?   
+No. Take H = the set of u different constant functions.   
+
+#### Bloom Filters
+A hash table's hash function locates a position from an array, and this position stores a pointer to the object. If the given computer is 32 bit architecture, one memory word of 32 bit is needed as a pointer for each object. On the contrary, a bloom filter needs a single bit among 32 bit for a hash function to check if an object exists, not even a memory word.   
+```text
+             A Hash Table                                     A Bloom Filter
+
+                         memory word 1                                    memory word 1
+                             +--+                                             +---+
+┌──────────┐                 |  |               ┌──────────┐ ────────────────▶| 1 |
+│   hash   │ ───────────▶    |--|               │   hash   │                  |---|
+│ function │                 |  |               │ function │ ────────────────▶| 0 |
+│          │                 |--|               │          │                  |---|
+│          │                 +--+               │          │ ────────────────▶| 1 |
+│          │                  .                 │          │                  |---|
+│          │                  .                 │          │ ────────────────▶| 1 |
+│          │                  .                 │          │                  |---|
+│          │             memory word n          │          │ ────────────────▶| 0 |
+│          │                 +--+               │          │                  |---|
+│          │                 |  |               │          │ ────────────────▶| 1 |
+│          │                 |--|               │          │                  |---|
+│          │ ───────────▶    |  |               │          │ ────────────────▶| 1 |
+│          │                 |--|               │          │                  |---|
+└────---───┘                 |  |               └────---───┘ ────────────────▶| 0 |
+                             +--+                                             +---+
+```
+
+Do not be confused. A bloom filter certainly exploits more than one memory word. The drawing above is to emphasize the fact that a bloom filter operates on a bit basis instead of a memory word. Also, while hash tables typically use a single hash function, bloom filters need multiple hash functions in order to reduce error probability.   
+
+A false positive (LookUp returns true even if it should otherwise) is inevitable in a bloom filter by definition of LookUp operation with $` m `$ number of hash functions. It is also certain that there would be no false negative.   
+```text
+LookUp given an input k
+
+    for i from 1 to m
+      if h_i(k) position in an array is 0
+        return false
+    return true
+```
+
+### Quiz 12.7
+Suppose a data set S is inserted into a bloom filter that uses $` m `$ hash functions and a length-n bit array. Under the heuristic assumptions, what is the probability that a given bit of the bloom filter (the first bit, say) has been set to 1 after the data set S has been inserted?
+```math
+\begin{align}
+1 - (1 - \frac{1}{n})^{m|S|}
+\end{align}
+```   
+by heuristic assumptions of:   
+1. For every $` k \in U `$ in the data set and hash function $` h_i `$ of the bloom filter, $` h_i(k) `$ is uniformly distributed. 
+2. All of the $` h_i(k) `$'s, ranging over all keys $` k \in U `$ and hash functions $` h_1, h_2, ..., h_m `$, are independent random variables.   
+
+The answer of the quiz is expressed as:
+```math
+\begin{align}
+1 - (1 - \frac{1}{n})^{nm/b} \text{ with per-key space }b = \frac{m}{|S|} \\ 
+\Rightarrow \lim\limits_{n\to \infty} (1 - (1 - \frac{1}{n})^{nm/b}) = 1 - e^{-m/b} \\
+\end{align}
+```
+A false positive means all of $` m `$ number of hash functions of the bloom filter returns 1 given a key. Assuming independent occurences, the probability of false positive occurence is:
+```math
+\begin{align}
+(1 - e^{-m/b})^m \\
+\text{minimized at} \\ 
+m = b\ln 2
+\end{align}
+```
+Remember that this is only a heuristic approach:
+- Memory space is finite so $` n `$ cannot go to infinity. 
+- Even under the heuristic assumptions, two different bits of a bloom filter are not independent.   
+
+### Problem 12.2
+A good hash function mimics the gold standard of a random function for all practical purposes, so it's interesting to investigate collisions with a random function. If the locations of two different keys $` k_1, k_2 \in U `$ are chosen independently and uniformly at random across $` n `$ array positions (with all possibilities equally likely), what is the probability that $` k_1 `$ and $` k_2 `$ will collide?   
+$` \frac{1}{n} `$ not $` \frac{1}{n^2} `$   
+
+### Optional Problem
+Recall that a set H of hash functions (mapping the elements of a universe $` U `$ to the buckets $` \{0,1,2,…,n−1\} `$) is universal if for every distinct $` x,y \in U `$, the probability $` Prob[h(x)=h(y)] `$ that $` x `$ and $` y `$ collide, assuming that the hash function h is chosen uniformly at random from $` H `$, is at most $` 1/n `$. In this problem you will prove that a collision probability of $` 1/n `$ is essentially the best possible. Precisely, suppose that $` H `$ is a family of hash functions mapping $` U `$ to $` \{0,1,2,…,n−1\} `$, as above. Show that there must be a pair $` x,y \in U `$ of distinct elements such that, if $` h `$ is chosen uniformly at random from $` H `$, then $` Prob[h(x)=h(y)] \ge \frac{1}{n} - \frac{1}{|U|} `$.
+
 # References
 - Tim Roughgarden. (2018)  Algorithms Illuminated Part 1 (1st ed.). Soundlikeyourself Publishing, LLC
 - Tim Roughgarden. (2018)  Algorithms Illuminated Part 2 (1st ed.). Soundlikeyourself Publishing, LLC
