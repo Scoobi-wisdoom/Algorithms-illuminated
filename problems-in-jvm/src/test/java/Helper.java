@@ -22,6 +22,22 @@ public class Helper {
         }
     }
 
+    public static long[] readLongArray(String fileName) throws IOException {
+        final InputStream inputStream = Helper.class.getClassLoader().getResourceAsStream(fileName);
+
+        if (inputStream == null) {
+            throw new IllegalArgumentException("File not found: " + fileName);
+        }
+
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
+            final List<Long> numbers = reader.lines()
+                    .map(String::trim)
+                    .map(Long::parseLong)
+                    .toList();
+            return numbers.stream().mapToLong(i -> i).toArray();
+        }
+    }
+
     public static String readDecimal(String fileName) throws IOException {
         final InputStream inputStream = Helper.class.getClassLoader().getResourceAsStream(fileName);
 
